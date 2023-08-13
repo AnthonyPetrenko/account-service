@@ -1,0 +1,32 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-account
+      author: Anton
+      failOnError: false
+      changes:
+        - createTable:
+            tableName: account
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: account_number
+                  type: varchar(14)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: project_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+        - createSequence:
+            dataType: int
+            incrementBy: 1
+            maxValue: 999999
+            minValue: 1
+            sequenceName: account_number_sequence
