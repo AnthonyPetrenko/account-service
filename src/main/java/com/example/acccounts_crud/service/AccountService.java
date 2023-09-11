@@ -1,6 +1,7 @@
 package com.example.acccounts_crud.service;
 
 import com.example.acccounts_crud.feign_client.ProjectFeignClient;
+import com.example.acccounts_crud.kafka.ProjectIdProducer;
 import com.example.acccounts_crud.model.Account;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,15 +21,18 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final AccountNumberGenerator accountNumberGenerator;
     private final ProjectFeignClient feignClient;
+    private final ProjectIdProducer projectIdProducer;
 
 
     @Autowired
     public AccountService(AccountRepository accountRepository,
                           AccountNumberGenerator accountNumberGenerator,
-                          ProjectFeignClient feignClient) {
+                          ProjectFeignClient feignClient,
+                          ProjectIdProducer projectIdProducer) {
         this.accountRepository = accountRepository;
         this.accountNumberGenerator = accountNumberGenerator;
         this.feignClient = feignClient;
+        this.projectIdProducer = projectIdProducer;
     }
 
     public boolean createNewAccount(long projectId) {
@@ -41,7 +45,7 @@ public class AccountService {
             log.info("Account has been created. Account number: " + accountNumber
                     + ". Project ID " + projectId);
 
-            sendDataByFeignClient(projectId);
+            projectIdProducer.sendProjectId("testTopic", projectId);
 
             return true;
         } else {
@@ -87,7 +91,7 @@ public class AccountService {
     }
 
     @Transactional
-    public boolean removeAllProjectId(long projectId){
+    public boolean removeAllProjectId(long projectId) {
 
         int isRemoved = accountRepository.removeAllProjectId(projectId);
 
@@ -100,16 +104,7 @@ public class AccountService {
         return isRemoved > 0;
     }
 
-    private void sendDataByFeignClient(long projectId) {
-
-        feignClient.changeProjectStatus(projectId);
-
-        log.info("Project ID " + projectId +
-                " has been sent to http://localhost:8081/change-status");
-    }
-
-    private boolean checkIfProjectExist(long projectId){
+    private boolean checkIfProjectExist(long projectId) {
         return feignClient.checkIfProjectExist(projectId);
     }
-
 }

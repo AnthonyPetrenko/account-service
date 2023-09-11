@@ -63,7 +63,7 @@ public class AccountController {
     public ResponseEntity<String> removeAllProjectId
             (@RequestParam("project-id") long projectId) {
 
-        if (accountService.removeAllProjectId(projectId)){
+        if (accountService.removeAllProjectId(projectId)) {
             return ResponseEntity
                     .ok("Project ID " + projectId + " was removed.");
         } else {
